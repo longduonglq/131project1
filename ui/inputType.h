@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/13/21.
-//
+// Long Duong 
+// 02/18/2020
+// Description: Provides an input function that look for input of a particular type.
 
 #ifndef PROJ1_INPUTTYPE_H
 #define PROJ1_INPUTTYPE_H
@@ -9,6 +9,9 @@
 #include <string>
 
 /// Credit: Based largely on Prof. Hester Tools.cpp
+
+// Preconditions: A well formed prompt and an inputable type parameter represents the expected input type.
+// Postconditions: The user input is returned in type provided.
 template <typename T>
 T inputType(std::string prompt)
 {

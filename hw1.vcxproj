@@ -117,7 +117,6 @@
     <ClCompile Include="ui\Table.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="baseConverter.h" />
     <ClInclude Include="discard\common.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="statistics.h" />

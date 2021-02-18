@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/13/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: A class that does various statistic metrics on a sorted array.
 
 #ifndef PROJ1_STATISTICS_H
 #define PROJ1_STATISTICS_H
@@ -31,6 +31,8 @@ public:
         double frequencyPercentage;
     };
 
+    // Preconditions: A path to a text file
+    // Postconditions: Initialized the instance with data from text file or throw exception if file cannot be opened.
     void loadDataFromFilePath(string path)
     {
         ifstream statsFile(path, ios::in);
@@ -45,6 +47,8 @@ public:
         else throw UIExcept("Cannot open file");
     }
 
+    // Preconditions: None
+    // Postconditions: Internal states are cleared to prepare for new data.
     void clear()
     {
         elements.clear();
@@ -57,45 +61,58 @@ public:
     Statistics() :
         elements {}
     {}
-    Statistics(vector<T>&& elements)
-    :
-    elements {move(elements)}
+
+    // Preconditions: Expect a vector of elements T
+    // Postconditions: Instance initialized  with data in T
+    Statistics(vector<T>&& elements) :
+        elements {move(elements)}
     {
         sort(elements.begin(), elements.end());
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the minimum
     const T& getMin() const
     {
         return elements.front();
     }
+
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return maximum
     const T& getMax() const
     {
         return elements.back();
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return range
     const T getRange()
     {
         return getMax() - getMin();
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return sum of all elements.
     const T& getSum() const
     {
         if (_sumCache.has_value())
             return _sumCache.value();
         else
         {
-            _sumCache.emplace(
-                accumulate(elements.cbegin(), elements.cend(), 0, plus<>())
-            );
+            _sumCache.emplace(accumulate(elements.cbegin(), elements.cend(), 0, plus<>()));
             return _sumCache.value();
         }
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return number of elements.
     size_t getSize() const
     {
         return elements.size();
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the mean of all elements.
     const double& getMean() const
     {
         if (_meanCache.has_value())
@@ -107,11 +124,15 @@ public:
         }
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return an optional that contains the median if exist and nullopt otherwise.
     optional<double> getMedian() const
     {
         return getMedianInRange(elements.begin(), elements.end());
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the mode.
     std::vector<T> getMode() const
     {
         auto freqTable = getFrequencyTable();
@@ -129,6 +150,8 @@ public:
         return modeElements;
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the variance
     const double& getVariance() const
     {
         if (_varianceCache.has_value())
@@ -136,28 +159,33 @@ public:
         else
         {
             _varianceCache.emplace(
-            transform_reduce(
-            elements.cbegin(), elements.cend(),
-            0.0,
-            plus<>(),
-            [this](const T& element) { return pow(element - this->getMean(), 2); }
-            ) / (getSize() - 1)
+                transform_reduce(
+                    elements.cbegin(), elements.cend(),
+                    0.0,
+                    plus<>(),
+                    [this](const T& element) { return pow(element - this->getMean(), 2); }
+                ) / (getSize() - 1)
             );
             return _varianceCache.value();
         }
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the standard deviation
     double getStandardDeviation() const
     {
         return sqrt(getVariance());
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the midRange
     double getMidRange() const
     {
         return (getMax() + getMin()) / 2.0;
     }
 
-
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return a struct with 3 optionals for each quartiles that contains a value if the quartile exists.
     const Quartiles& getQuartiles() const
     {
         if (_quartilesCache.has_value())
@@ -186,6 +214,8 @@ public:
         }
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the IQR if it exists, otherwise nullopt
     optional<double> getIQR() const
     {
         auto& quartiles = getQuartiles();
@@ -194,6 +224,8 @@ public:
         return quartiles.Q3.value() - quartiles.Q1.value();
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return outlierFence if IQR exists, nullopt otherwise.
     optional<pair<double, double>> getOutlierFence() const
     {
         if (!getIQR().has_value()) return std::nullopt;
@@ -201,17 +233,23 @@ public:
         return std::make_pair(q.Q1.value() - 1.5 * getIQR().value(), q.Q3.value() + 1.5 * getIQR().value());
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return an array of outliers. 
     std::vector<T> getOutliers() const
     {
         auto outliers = std::vector<T>();
         if (!getOutlierFence().has_value()) return outliers;
         auto fence = getOutlierFence().value();
-        std::copy_if(elements.cbegin(), elements.cend(),
-                     std::back_inserter(outliers),
-                     [&fence](const auto& e){ return e < fence.first || e > fence.second; });
+        std::copy_if(
+            elements.cbegin(), elements.cend(),
+            std::back_inserter(outliers),
+            [&fence](const auto& e){ return e < fence.first || e > fence.second; }
+        );
         return outliers;
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return sumOfSquares.
     double getSumOfSquares() const
     {
         return
@@ -222,46 +260,58 @@ public:
             [this](const T& element) { return pow(element - this->getMean(), 2);}
         );
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return mean absolute deviation.
     double getMeanAbsoluteDeviation() const
     {
         return
             std::transform_reduce(
-            elements.cbegin(), elements.cend(),
-            0.0,
-            std::plus<>(),
-            [this](const T& element) { return abs(element - this->getMean()); }
+                elements.cbegin(), elements.cend(),
+                0.0,
+                std::plus<>(),
+                [this](const T& element) { return abs(element - this->getMean()); }
         ) / getSize();
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return the root mean square
     double getRootMeanSquare() const
     {
         return
         sqrt(
-                std::transform_reduce(
-                    elements.cbegin(), elements.cend(),
-                    0.0,
-                    std::plus<>(),
-                    [](const T& element) { return element * element; }
-                ) / getSize()
+            std::transform_reduce(
+                elements.cbegin(), elements.cend(),
+                0.0,
+                std::plus<>(),
+                [](const T& element) { return element * element; }
+            ) / getSize()
         );
     }
 
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return standard error of the mean
     double getStdErrorOfMean() const
     {
         return getStandardDeviation() / sqrt(getSize());
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return coefficient of variantion
     double getCoefficientOfVariation() const
     {
         return getStandardDeviation() / getMean();
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return relative standard deviation.
     double getRelativeStd() const
     {
         return (100.0 * getStandardDeviation()) / getMean();
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return skewness
     double getSkewness() const
     {
         return
@@ -275,30 +325,33 @@ public:
             }
         ) / (getSize() * pow(getStandardDeviation(), 3));
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return kurtosis.
     double getKurtosis() const
     {
         double n = getSize();
         double coefficient = n * (n + 1) / ((n - 1) * (n - 2) * (n - 3));
         return
         coefficient * std::transform_reduce(
-        elements.cbegin(), elements.cend(),
-        0.0,
-        std::plus<>(),
-        [this](const auto& e)
-        {
-            return pow(e - this->getMean(), 4);
-        }
+            elements.cbegin(), elements.cend(),
+            0.0,
+            std::plus<>(),
+            [this](const auto& e){ return pow(e - this->getMean(), 4); }
         ) / pow(getStandardDeviation(), 4);
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return kurtosis excess
     double getKurtosisExcess() const
     {
         double n = getSize();
         double adjustmentTerm = -3* (n - 1) * (n - 1) / ((n - 2) * (n - 3));
         return getKurtosis() + adjustmentTerm;
     }
-
+    
+    // Preconditions: Instance was initialized with more than 0 element.
+    // Postconditions: Return a vector of struct that contains value, frequency, and frequency percentage.
     std::vector<FrequencyEntry> getFrequencyTable() const
     {
         auto frequencyTable = std::vector<FrequencyEntry> ();

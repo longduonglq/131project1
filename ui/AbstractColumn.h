@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/17/21.
-//
+// Name: Long Duong 
+// Date: 02/18/2020
+// Description: Provides an abstract interface for objects contained in the Table class.
 
 #ifndef PROJ1_ABSTRACTCOLUMN_H
 #define PROJ1_ABSTRACTCOLUMN_H
@@ -9,12 +9,28 @@
 class AbstractColumn
 {
 public:
+    // Preconditions: None
+    // Postconditions: Instance is initialized.
     AbstractColumn() = default;
-    virtual ~AbstractColumn() {};
 
+    // Preconditions: Instance was properly initialized
+    // Postconditions: Depends on the derived class implementation.
+    virtual ~AbstractColumn() {};
+    
+    // Preconditions: Instance was property initialized.
+    // Postconditions: Return the width of the column.
     virtual const int getColumnWidth() const = 0;
+
+    // Preconditions: Instance was properly initialized.
+    // Postconditions: The number of entries in the column is returned.
     virtual const std::size_t getSize() = 0;
+
+    // Preconditions: Instance was properly initialized with entries appened.
+    // Postconditions: Print the next entry onto the outstream given.
     virtual void dumpNext(std::wostream& os) = 0;
+
+    // Preconditions: Instance was properly initialized.
+    // Postconditions: Reset internal state so dumpNext will start printing from the first entry.
     virtual void reset() = 0;
 };
 

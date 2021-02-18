@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/13/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: A class that renders columns with nice formatting.
 
 #ifndef PROJ1_TABLE_H
 #define PROJ1_TABLE_H
@@ -14,7 +14,8 @@
 #include "configuration.h"
 #include "AbstractColumn.h"
 
-class Table {
+class Table 
+{
 public:
     int tableWidth;
 

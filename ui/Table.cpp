@@ -1,39 +1,38 @@
-//
-// Created by dop on 2/13/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: Implements methods that outputs a table based on columns contained.
+
 #include "Table.h"
 
 
-Table::Table(const std::vector<AbstractColumn*>& _columns, std::wstring _title)
-:
-columns {_columns},
-title {_title},
-tableWidth {0},
-consoleWidth {config::CONSOLE_WIDTH}
+Table::Table(const std::vector<AbstractColumn*>& _columns, std::wstring _title) :
+    columns {_columns},
+    title {_title},
+    tableWidth {0},
+    consoleWidth {config::CONSOLE_WIDTH}
 {
     // Center table
     tableWidth = std::transform_reduce(
-    columns.cbegin(), columns.cend(),
-    0,
-    std::plus<int> (),
-    [](const auto& a) { return a->getColumnWidth(); }
+        columns.cbegin(), columns.cend(),
+        0,
+        std::plus<int> (),
+        [](const auto& a) { return a->getColumnWidth(); }
     );
     leftPadding = (config::CONSOLE_WIDTH - tableWidth) / 2;
     rightPadding = leftPadding;
 }
 
-Table::Table(const std::vector<AbstractColumn*>& _columns, std::wstring _title, int _consoleWidth, bool selfCentered)
-:
-columns {_columns},
-title {_title},
-tableWidth {0}
+Table::Table(const std::vector<AbstractColumn*>& _columns, std::wstring _title, int _consoleWidth, bool selfCentered) :
+    columns {_columns},
+    title {_title},
+    tableWidth {0}
 {
     // Center table
     tableWidth = std::transform_reduce(
-    columns.cbegin(), columns.cend(),
-    0,
-    std::plus<int> (),
-    [](const auto& a) { return a->getColumnWidth(); }
+        columns.cbegin(), columns.cend(),
+        0,
+        std::plus<int> (),
+        [](const auto& a) { return a->getColumnWidth(); }
     );
 
     if (!selfCentered)

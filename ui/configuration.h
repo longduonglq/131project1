@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/13/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: Provides configurable constants that are used in UI classes.
 
 #ifndef PROJ1_CONFIGURATION_H
 #define PROJ1_CONFIGURATION_H

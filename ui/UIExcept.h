@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/14/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: The exception class thrown by various items in UI.
 
 #ifndef PROJ1_UIEXCEPT_H
 #define PROJ1_UIEXCEPT_H

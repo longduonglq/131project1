@@ -1,123 +1,75 @@
-//
-// Created by dop on 2/17/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: Implements methods that display choices and process user choices.
 
 #include "statisticsUI.h"
 
 void StatsUI::showCurrentState()
 {
-auto optionColumn1 = new MixedColumn (0, 5,L"");
-optionColumn1->addItems(
-L"A> Load data file",
-L"B> Minimum",
-L"C> Maximum",
-L"D> Range",
-L"E> Size",
-L"F> Sum",
-L"G> Mean",
-L"H> Median",
-L"I> Frequencies",
-L"J> Mode",
-L"K> Standard Deviation",
-L"L> Variance",
-L"W> Display result and write to file.",
-L"0> Return"
-);
-auto optionColumn2 = new MixedColumn(0, 5,L"");
-optionColumn2->addItems(
-L"M> Mid Range",
-L"N> Quartiles",
-L"O> Interquartile Range",
-L"P> Outliers",
-L"Q> Sum of Squares",
-L"R> Mean Absolute Deviation",
-L"S> Root Mean Square",
-L"T> Standard Error of the Mean",
-L"U> Coefficient of Variation",
-L"V> Relative Standard Deviation"
-);
-Table({ optionColumn1, optionColumn2 }, L"3> Descriptive Statistics").dumpTableTo(std::wcout);
+    auto optionColumn1 = new MixedColumn (0, 5,L"");
+    optionColumn1->addItems(
+        L"A> Load data file",
+        L"B> Minimum",
+        L"C> Maximum",
+        L"D> Range",
+        L"E> Size",
+        L"F> Sum",
+        L"G> Mean",
+        L"H> Median",
+        L"I> Frequencies",
+        L"J> Mode",
+        L"K> Standard Deviation",
+        L"L> Variance",
+        L"W> Display result and write to file.",
+        L"0> Return"
+    );
+    auto optionColumn2 = new MixedColumn(0, 5,L"");
+    optionColumn2->addItems(
+        L"M> Mid Range",
+        L"N> Quartiles",
+        L"O> Interquartile Range",
+        L"P> Outliers",
+        L"Q> Sum of Squares",
+        L"R> Mean Absolute Deviation",
+        L"S> Root Mean Square",
+        L"T> Standard Error of the Mean",
+        L"U> Coefficient of Variation",
+        L"V> Relative Standard Deviation"
+    );
+    Table({ optionColumn1, optionColumn2 }, L"3> Descriptive Statistics").dumpTableTo(std::wcout);
 }
 
 
 void StatsUI::init()
 {
-this->terminateCharacter = '0';
-choiceCollector = CharParameter ("Option: ",
-                                 [](const char& c){ return c == '0' || (tolower(c) >= 'a' && tolower(c) <= 'w');});
+    this->terminateCharacter = '0';
+    choiceCollector = CharParameter ("Option: ", [](const char& c){ return c == '0' || (tolower(c) >= 'a' && tolower(c) <= 'w');});
 
-auto nonEmptyVector = std::shared_ptr<AbstractPrerequisite>(
-new RequireNonEmptyVector(std::ref(elements), "No elements in array")
-);
+    auto nonEmptyVector = std::shared_ptr<AbstractPrerequisite>( new RequireNonEmptyVector(std::ref(elements), "No elements in array"));
 
-addOption('a',
-std::bind(&StatsUI::loadFileOptionHandler, this, _1),
-StringParameter("Enter file path: "));
-addOption('b',
-statsDisplayAdapter(L"Minimum", std::bind(&Statistics::getMin, this))
-).require(nonEmptyVector);
-addOption('c',
-statsDisplayAdapter(L"Maximum", std::bind(&Statistics::getMax, this))
-).require(nonEmptyVector);
-addOption('d',
-statsDisplayAdapter(L"Range", std::bind(&Statistics::getRange, this))
-).require(nonEmptyVector);
-addOption('e',
-statsDisplayAdapter(L"Size", std::bind(&Statistics::getSize, this))
-).require(nonEmptyVector);
-addOption('f',
-statsDisplayAdapter(L"Sum", std::bind(&Statistics::getSum, this))
-).require(nonEmptyVector);
-addOption('g',
-statsDisplayAdapter(L"Mean", std::bind(&Statistics::getMean, this))
-).require(nonEmptyVector);
-addOption('h',
-statsDisplayAdapter(L"Median", std::bind(&Statistics::getMedian, this))
-).require(nonEmptyVector);
-addOption('i',
-frequencyTableDisplayAdapter(std::bind(&Statistics::getFrequencyTable, this))
-).require(nonEmptyVector);
-addOption('j',
-statsDisplayAdapter(L"Mode", std::bind(&Statistics::getSize, this))
-).require(nonEmptyVector);
-addOption('k',
-statsDisplayAdapter(L"Standard Deviation", std::bind(&Statistics::getStandardDeviation, this))
-).require(nonEmptyVector);
-addOption('l',
-statsDisplayAdapter(L"Variance", std::bind(&Statistics::getVariance, this))
-).require(nonEmptyVector);
-addOption('m',
-statsDisplayAdapter(L"Mid Range", std::bind(&Statistics::getMidRange, this))
-).require(nonEmptyVector);
-addOption('n',
-quartilesDisplayAdapter(std::bind(&Statistics::getQuartiles, this))
-).require(nonEmptyVector);
-addOption('o',
-statsDisplayAdapter(L"Interquartile Range", std::bind(&Statistics::getIQR, this))
-).require(nonEmptyVector);
-addOption('p',
-statsDisplayAdapter(L"Outliers", std::bind(&Statistics::getOutliers, this))
-).require(nonEmptyVector);
-addOption('q',
-statsDisplayAdapter(L"Sum of Squares", std::bind(&Statistics::getSumOfSquares, this))
-).require(nonEmptyVector);
-addOption('r',
-statsDisplayAdapter(L"Mean Absolute Deviation", std::bind(&Statistics::getMeanAbsoluteDeviation, this))
-).require(nonEmptyVector);
-addOption('s',
-statsDisplayAdapter(L"Root Mean Square", std::bind(&Statistics::getRootMeanSquare, this))
-).require(nonEmptyVector);
-addOption('t',
-statsDisplayAdapter(L"Standard Error of the Mean", std::bind(&Statistics::getStdErrorOfMean, this))
-).require(nonEmptyVector);
-addOption('u',
-statsDisplayAdapter(L"Coefficient of Variation", std::bind(&Statistics::getCoefficientOfVariation, this))
-).require(nonEmptyVector);
-addOption('v',
-statsDisplayAdapter(L"Relative Standard Deviation", std::bind(&Statistics::getRelativeStd, this))
-).require(nonEmptyVector);
-addOption('w', std::bind(&StatsUI::displayAllResultAndWriteToFile, this)
-).require(nonEmptyVector);
+    addOption('a', std::bind(&StatsUI::loadFileOptionHandler, this, _1), StringParameter("Enter file path: "));
+    addOption('b', statsDisplayAdapter(L"Minimum", std::bind(&Statistics::getMin, this))) .require(nonEmptyVector);
+    addOption('c', statsDisplayAdapter(L"Maximum", std::bind(&Statistics::getMax, this))) .require(nonEmptyVector);
+    addOption('d', statsDisplayAdapter(L"Range", std::bind(&Statistics::getRange, this))) .require(nonEmptyVector);
+    addOption('e', statsDisplayAdapter(L"Size", std::bind(&Statistics::getSize, this))) .require(nonEmptyVector);
+    addOption('f', statsDisplayAdapter(L"Sum", std::bind(&Statistics::getSum, this))) .require(nonEmptyVector);
+    addOption('g', statsDisplayAdapter(L"Mean", std::bind(&Statistics::getMean, this))) .require(nonEmptyVector);
+    addOption('h', statsDisplayAdapter(L"Median", std::bind(&Statistics::getMedian, this))).require(nonEmptyVector);
+    addOption('i', frequencyTableDisplayAdapter(std::bind(&Statistics::getFrequencyTable, this))).require(nonEmptyVector);
+    addOption('j', statsDisplayAdapter(L"Mode", std::bind(&Statistics::getSize, this))).require(nonEmptyVector);
+    addOption('k', statsDisplayAdapter(L"Standard Deviation", std::bind(&Statistics::getStandardDeviation, this))).require(nonEmptyVector);
+    addOption('l', statsDisplayAdapter(L"Variance", std::bind(&Statistics::getVariance, this))).require(nonEmptyVector);
+    addOption('m', statsDisplayAdapter(L"Mid Range", std::bind(&Statistics::getMidRange, this))).require(nonEmptyVector);
+    addOption('n', quartilesDisplayAdapter(std::bind(&Statistics::getQuartiles, this))).require(nonEmptyVector);
+    addOption('o', statsDisplayAdapter(L"Interquartile Range", std::bind(&Statistics::getIQR, this))).require(nonEmptyVector);
+    addOption('p', statsDisplayAdapter(L"Outliers", std::bind(&Statistics::getOutliers, this))).require(nonEmptyVector);
+    addOption('q', statsDisplayAdapter(L"Sum of Squares", std::bind(&Statistics::getSumOfSquares, this))).require(nonEmptyVector);
+    addOption('r', statsDisplayAdapter(L"Mean Absolute Deviation", std::bind(&Statistics::getMeanAbsoluteDeviation, this))).require(nonEmptyVector);
+    addOption('s', statsDisplayAdapter(L"Root Mean Square", std::bind(&Statistics::getRootMeanSquare, this))).require(nonEmptyVector);
+    addOption('t', statsDisplayAdapter(L"Standard Error of the Mean", std::bind(&Statistics::getStdErrorOfMean, this))).require(nonEmptyVector);
+    addOption('u', statsDisplayAdapter(L"Coefficient of Variation", std::bind(&Statistics::getCoefficientOfVariation, this))).require(nonEmptyVector);
+    addOption('v', statsDisplayAdapter(L"Relative Standard Deviation", std::bind(&Statistics::getRelativeStd, this))).require(nonEmptyVector);
+    addOption('w', std::bind(&StatsUI::displayAllResultAndWriteToFile, this)).require(nonEmptyVector);
 }
 
 void StatsUI::loadFileOptionHandler(std::string&& path)
@@ -167,8 +119,10 @@ Table* StatsUI::frequencyTableToUITable(Func frequencyTableGetter)
     std::vector<long> frequency;
     std::transform(freqTable.begin(), freqTable.end(), std::back_inserter(frequency), std::mem_fn(&FrequencyEntry::frequency));
     std::vector<double> frequencyPercentage;
-    std::transform(freqTable.begin(), freqTable.end(), std::back_inserter(frequencyPercentage),
-                   [](const auto& entry){return 100 * std::mem_fn(&FrequencyEntry::frequencyPercentage)(entry);}
+    std::transform(
+        freqTable.begin(), freqTable.end(), 
+        std::back_inserter(frequencyPercentage),
+        [](const auto& entry){return 100 * std::mem_fn(&FrequencyEntry::frequencyPercentage)(entry);}
     );
 
     auto valueColumn = new MixedColumn (0, 5, L"Values");
@@ -195,31 +149,32 @@ void StatsUI::displayAllResultAndWriteToFile()
 {
     auto statisticNameColumn = new MixedColumn (0, 5,L"Concept");
     statisticNameColumn->addItems(
-    L"Data",
-    L"Minimum",
-    L"Maximum",
-    L"Range",
-    L"Size",
-    L"Sum",
-    L"Mean",
-    L"Median",
-    L"Mode",
-    L"Standard Deviation",
-    L"Variance",
-    L"Mid Range",
-    L"Quartiles",
-    L"Interquartile Range",
-    L"Outliers",
-    L"Sum of Squares",
-    L"Mean Absolute Deviation",
-    L"Root Mean Square",
-    L"Standard Error of the Mean",
-    L"Skewness",
-    L"Kurtosis",
-    L"Kurtosis Excess",
-    L"Coefficient of Variation",
-    L"Relative Standard Deviation",
-    L"Frequency Table");
+        L"Data",
+        L"Minimum",
+        L"Maximum",
+        L"Range",
+        L"Size",
+        L"Sum",
+        L"Mean",
+        L"Median",
+        L"Mode",
+        L"Standard Deviation",
+        L"Variance",
+        L"Mid Range",
+        L"Quartiles",
+        L"Interquartile Range",
+        L"Outliers",
+        L"Sum of Squares",
+        L"Mean Absolute Deviation",
+        L"Root Mean Square",
+        L"Standard Error of the Mean",
+        L"Skewness",
+        L"Kurtosis",
+        L"Kurtosis Excess",
+        L"Coefficient of Variation",
+        L"Relative Standard Deviation",
+        L"Frequency Table"
+    );
 
     auto quartiles = getQuartiles();
     auto quartileNames = new MixedColumn(0, 5, L"", "Q1", "Q2", "Q3");
@@ -234,31 +189,31 @@ void StatsUI::displayAllResultAndWriteToFile()
 
     auto statisticValueColumn = new MixedColumn(0, 5, L"Values");
     statisticValueColumn->addItems(
-    dataTable,
-    getMin(),
-    getMax(),
-    getRange(),
-    getSize(),
-    getSum(),
-    getMean(),
-    getMedian(),
-    getMode(),
-    getStandardDeviation(),
-    getVariance(),
-    getMidRange(),
-    quartileTable,
-    getIQR(),
-    getOutliers(),
-    getSumOfSquares(),
-    getMeanAbsoluteDeviation(),
-    getRootMeanSquare(),
-    getStdErrorOfMean(),
-    getSkewness(),
-    getKurtosis(),
-    getKurtosisExcess(),
-    getCoefficientOfVariation(),
-    to_wstring(getRelativeStd()) + L"%",
-    frequencyTableToUITable(std::bind(&Statistics::getFrequencyTable, this))
+        dataTable,
+        getMin(),
+        getMax(),
+        getRange(),
+        getSize(),
+        getSum(),
+        getMean(),
+        getMedian(),
+        getMode(),
+        getStandardDeviation(),
+        getVariance(),
+        getMidRange(),
+        quartileTable,
+        getIQR(),
+        getOutliers(),
+        getSumOfSquares(),
+        getMeanAbsoluteDeviation(),
+        getRootMeanSquare(),
+        getStdErrorOfMean(),
+        getSkewness(),
+        getKurtosis(),
+        getKurtosisExcess(),
+        getCoefficientOfVariation(),
+        to_wstring(getRelativeStd()) + L"%",
+        frequencyTableToUITable(std::bind(&Statistics::getFrequencyTable, this))
     );
 
     auto equalColumn = new MixedColumn(0, 2, L"");

@@ -1,6 +1,6 @@
-//
-// Created by dop on 2/17/21.
-//
+// Name : Long Duong 
+// Date: 02/18/2020
+// Description: Implementation of various non-templated functions that output the display width of various types.
 
 #include "MixedColumn.h"
 
