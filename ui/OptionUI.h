@@ -11,10 +11,12 @@
 #include "Parameter.h"
 #include "UIExcept.h"
 
+using namespace std;
+
 class SingularOption
 {
 public:
-    std::function<void(std::ostream&)> invokeOption;
+    function<void(ostream&)> invokeOption;
 
 
     // Preconditions: None
@@ -35,13 +37,13 @@ public:
     template <typename OptionHandler_t, typename ...AbstractParameters>
     void bindHandler(OptionHandler_t optionHandler, AbstractParameters... requiredParams)
     {
-        invokeOption = [this, optionHandler, requiredParams...] ( std::ostream& os )
+        invokeOption = [this, optionHandler, requiredParams...] ( ostream& os )
         {
             for (auto& prerequisite: prerequisites)
             {
                 if (!prerequisite->isSatisfied())
                 {
-                    os << prerequisite->getErrorMsg() << std::endl;
+                    os << prerequisite->getErrorMsg() << endl;
                     return;
                 }
             }
@@ -51,7 +53,7 @@ public:
             }
             catch (UIExcept& e)
             {
-                os << e.what() << std::endl;
+                os << e.what() << endl;
                 return;
             }
         };
@@ -59,14 +61,14 @@ public:
 
     // Preconditions: Expect a shared_ptr to a prerequisite
     // Postconditions: Prerequisite is added to the list of prechecks for before invoking this option.
-    SingularOption& require(std::shared_ptr<AbstractPrerequisite> condition)
+    SingularOption& require(shared_ptr<AbstractPrerequisite> condition)
     {
         prerequisites.push_back(condition);
         return *this;
     }
 
 private:
-    std::vector<std::shared_ptr<AbstractPrerequisite>> prerequisites;
+    vector<shared_ptr<AbstractPrerequisite>> prerequisites;
 };
 
 class OptionUI
@@ -86,9 +88,9 @@ public:
         assert (options.find(optionCharacter) == options.end());
 
         auto singularOptionIt = options.insert(
-            std::make_pair(
+            make_pair(
                 optionCharacter,
-                std::make_unique<SingularOption>(
+                make_unique<SingularOption>(
                     optionHandler,
                     requiredParams...
                 )
@@ -102,7 +104,7 @@ public:
     void processOption(char optionCharacter)
     {
         auto option = options.find(optionCharacter);
-        option->second->invokeOption(std::cout);
+        option->second->invokeOption(cout);
     }
     
     // Preconditions: None
@@ -126,7 +128,7 @@ public:
         {
             if (options.find(userChoice) == options.end())
             {
-                std::wcout << "Option was not registered" << std::endl;
+                wcout << "Option was not registered" << endl;
             }
             else
             {
@@ -138,8 +140,8 @@ public:
 
 protected:
     CharParameter choiceCollector;
-    std::optional<char> terminateCharacter;
-    std::map<char, std::unique_ptr<SingularOption>> options;
+    optional<char> terminateCharacter;
+    map<char, unique_ptr<SingularOption>> options;
 };
 
 #endif //PROJ1_OPTIONUI_H

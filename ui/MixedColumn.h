@@ -16,29 +16,31 @@
 #include "AbstractColumn.h"
 #include "configuration.h"
 
-std::size_t displayLength(const char* cStr);
-std::size_t displayLength(const wchar_t* cStr);
-std::size_t displayLength(std::wstring WideStr);
-std::size_t displayLength(char);
+using namespace std;
+
+size_t displayLength(const char* cStr);
+size_t displayLength(const wchar_t* cStr);
+size_t displayLength(wstring WideStr);
+size_t displayLength(char);
 
 
 // Preconditions: A numerical type.
 // Postconditions: The width it takes to display the value on screen.
 template<typename IntegerType,
-        typename std::enable_if<std::is_integral<IntegerType>::value, int>::type = 0>
-std::size_t displayLength(const IntegerType& var)
+        typename enable_if<is_integral<IntegerType>::value, int>::type = 0>
+size_t displayLength(const IntegerType& var)
 {
-    if (var < 0) return static_cast<std::size_t>(std::log10(-var) + 1 + 1);
+    if (var < 0) return static_cast<size_t>(log10(-var) + 1 + 1);
     else if (var == 0) return 1;
-    else return static_cast<std::size_t>(std::log10(var) + 1);
+    else return static_cast<size_t>(log10(var) + 1);
 }
 
 
 // Preconditions: A floating type (float, double, ...).
 // Postconditions: The width it takes to display the value on screen.
 template<typename FloatType,
-         typename std::enable_if<std::is_floating_point<FloatType>::value, int>::type = 0>
-std::size_t displayLength(const FloatType& var)
+         typename enable_if<is_floating_point<FloatType>::value, int>::type = 0>
+size_t displayLength(const FloatType& var)
 {
     if (long(var) == var)
     {
@@ -51,23 +53,23 @@ std::size_t displayLength(const FloatType& var)
 // Preconditions: A vector that contains any type.
 // Postconditions: The width it takes to display the vector's content on screen.
 template <typename T>
-std::size_t displayLength(const std::vector<T>& vec)
+size_t displayLength(const vector<T>& vec)
 {
-    std::size_t totalLength = 0;
+    size_t totalLength = 0;
     if (vec.empty())
     {
         return displayLength("None");
     }
     for (auto it = vec.cbegin(); it != --vec.cend(); it++)
     {
-        if (std::distance(vec.cbegin(), it) > config::ARRAY_MAX_WRAPPING_LENGTH)
+        if (distance(vec.cbegin(), it) > config::ARRAY_MAX_WRAPPING_LENGTH)
         {
-            totalLength + std::string(", ...").size();
+            totalLength + string(", ...").size();
             return totalLength;
         }
-        totalLength += displayLength(*it) + std::string(", ").size();
+        totalLength += displayLength(*it) + string(", ").size();
     }
-    totalLength -= std::string(", ").size();
+    totalLength -= string(", ").size();
     return totalLength;
 }
 
@@ -78,7 +80,7 @@ public:
 
     // Preconditions: Horizontal paddings and titles
     // Postconditions: Instance is ready to receive entries.
-    MixedColumn(int _leftPadding, int _rightPadding, std::wstring&& _title) :
+    MixedColumn(int _leftPadding, int _rightPadding, wstring&& _title) :
         leftPadding {_leftPadding},
         rightPadding {_rightPadding},
         title {_title},
@@ -90,7 +92,7 @@ public:
     // Preconditions: Horizontal paddings, title, and a parameter packs of various parameters of various types.
     // Postconditions: Instance is initialized with paddings and title given and all entries are internally added.
     template <typename ...ItemTypes>
-    MixedColumn(int _leftPadding, int _rightPadding, std::wstring&& _title, ItemTypes... items) :
+    MixedColumn(int _leftPadding, int _rightPadding, wstring&& _title, ItemTypes... items) :
         leftPadding {_leftPadding},
         rightPadding {_rightPadding},
         title {_title},
@@ -104,7 +106,7 @@ public:
     // Preconditions: A vector of items of the same type.
     // Postconditions: All items in the vector are added as individual entries.
     template <typename T>
-    void repeatedAddItems(std::vector<T> _items)
+    void repeatedAddItems(vector<T> _items)
     {
         for (auto item: _items)
             addItems(item);
@@ -123,7 +125,7 @@ public:
     void addItems()
     {
         currentIt = items.begin();
-        maxCharLength = std::max(maxCharLength, title.size());
+        maxCharLength = max(maxCharLength, title.size());
     }
     
 
@@ -132,9 +134,9 @@ public:
     template <typename ...OtherTypes>
     void addItems(Table* table, OtherTypes... otherArgs)
     {
-        maxCharLength = std::max(maxCharLength, static_cast<std::size_t>(table->tableWidth));
+        maxCharLength = max(maxCharLength, static_cast<size_t>(table->tableWidth));
         items.push_back(
-            [tablePtr = std::shared_ptr<Table>(table)] (std::wostream& os)
+            [tablePtr = shared_ptr<Table>(table)] (wostream& os)
             {
                 tablePtr->dumpTableTo(os);
             }
@@ -145,11 +147,11 @@ public:
     // Preconditions: Expect a vector type.
     // Postconditions: The vector is added as an entry in the column.
     template <typename T, typename ...OtherType>
-    void addItems(std::vector<T> vec, OtherType... otherArgs)
+    void addItems(vector<T> vec, OtherType... otherArgs)
     {
-        maxCharLength = std::max(maxCharLength, displayLength(vec));
+        maxCharLength = max(maxCharLength, displayLength(vec));
         items.push_back(
-            [this, vec](std::wostream& os)
+            [this, vec](wostream& os)
             {
                 if (vec.empty())
                     os << "None";
@@ -158,8 +160,8 @@ public:
                     for (auto it = vec.cbegin(); it != --vec.cend(); it++)
                     {
                         if (it != vec.cbegin()
-                            && std::distance(vec.cbegin(), it) % config::ARRAY_MAX_WRAPPING_LENGTH == 0)
-                            os << std::endl;
+                            && distance(vec.cbegin(), it) % config::ARRAY_MAX_WRAPPING_LENGTH == 0)
+                            os << endl;
                         os << *it << L", ";
                     }
                     os << vec.back();
@@ -173,14 +175,14 @@ public:
     // Preconditions: Expects an optional type.
     // Postconditions: The optional type is added as an entry in the column.
     template <typename T, typename ...OtherTypes>
-    void addItems(std::optional<T> op, OtherTypes... otherArgs)
+    void addItems(optional<T> op, OtherTypes... otherArgs)
     {
         if (op.has_value())
-            maxCharLength = std::max(maxCharLength, displayLength(op.value()));
+            maxCharLength = max(maxCharLength, displayLength(op.value()));
         else
-            maxCharLength = std::max(maxCharLength, displayLength("None"));
+            maxCharLength = max(maxCharLength, displayLength("None"));
         items.push_back(
-            [this, op](std::wostream& os)
+            [this, op](wostream& os)
             {
                 if (op.has_value())
                     os << op.value() << nSpace(maxCharLength - displayLength(op.value()) + rightPadding);
@@ -197,9 +199,9 @@ public:
     template <typename ...OtherTypes>
     void addItems(const char* str, OtherTypes... otherArgs)
     {
-        maxCharLength = std::max(maxCharLength, displayLength(str));
+        maxCharLength = max(maxCharLength, displayLength(str));
         items.push_back(
-            [this, str](std::wostream& os)
+            [this, str](wostream& os)
             {
                 os << str << nSpace(maxCharLength - displayLength(str) + rightPadding);
             }
@@ -212,9 +214,9 @@ public:
     template <typename ...OtherTypes>
     void addItems(const wchar_t* str, OtherTypes... otherArgs)
     {
-        maxCharLength = std::max(maxCharLength, displayLength(str));
+        maxCharLength = max(maxCharLength, displayLength(str));
         items.push_back(
-        [this, str](std::wostream& os)
+        [this, str](wostream& os)
         {
             os << str << nSpace(maxCharLength - displayLength(str) + rightPadding);
         }
@@ -225,10 +227,10 @@ public:
     // Preconditions: Expects a cpp-wide-string.
     // Postconditions: cpp-wide-string is added as an entry in the column.
     template <typename ...OtherTypes>
-    void addItems(std::wstring str, OtherTypes... otherArgs) {
-        maxCharLength = std::max(maxCharLength, displayLength(str));
+    void addItems(wstring str, OtherTypes... otherArgs) {
+        maxCharLength = max(maxCharLength, displayLength(str));
         items.push_back(
-        [this, str](std::wostream &os) {
+        [this, str](wostream &os) {
             os << str << nSpace(maxCharLength - displayLength(str) + rightPadding);
         }
         );
@@ -238,13 +240,13 @@ public:
     // Preconditions: Expects an numeric type.
     // Postconditions: Numeric value is added as an entry in the column.
     template <typename IntegerType,
-              typename std::enable_if<std::is_integral<IntegerType>::value, int>::type = 0,
+              typename enable_if<is_integral<IntegerType>::value, int>::type = 0,
               typename ...OtherType>
     void addItems(IntegerType integer, OtherType... otherArgs)
     {
-        maxCharLength = std::max(maxCharLength, displayLength(integer));
+        maxCharLength = max(maxCharLength, displayLength(integer));
         items.push_back(
-            [this, integer](std::wostream& os)
+            [this, integer](wostream& os)
             {
                 os << integer << nSpace(maxCharLength - displayLength(integer) + rightPadding);
             }
@@ -255,15 +257,15 @@ public:
     // Preconditions: Expect a floating type.
     // Postconditions: Floating value is added as an entry in the column with precision truncated based on value in config.
     template <typename FloatingType,
-              typename std::enable_if<std::is_floating_point<FloatingType>::value, int>::type = 0,
+              typename enable_if<is_floating_point<FloatingType>::value, int>::type = 0,
               typename ...OtherTypes>
     void addItems(FloatingType floatVar, OtherTypes... otherArgs)
     {
-        maxCharLength = std::max(maxCharLength, displayLength(floatVar));
+        maxCharLength = max(maxCharLength, displayLength(floatVar));
         items.push_back(
-            [this, floatVar](std::wostream& os)
+            [this, floatVar](wostream& os)
             {
-                os << std::fixed << std::setprecision(config::FLOAT_NUMBER_DIGITS)
+                os << fixed << setprecision(config::FLOAT_NUMBER_DIGITS)
                     << floatVar
                     << nSpace(maxCharLength - displayLength(floatVar) + rightPadding);
             }
@@ -274,18 +276,18 @@ public:
 
     // Preconditions:  Expects an integer
     // Postconditions: Outputs a space of length equals to the integer given.
-    std::wstring nSpace(int n)
+    wstring nSpace(int n)
     {
-        /// Call to nSpace instead of std::setw is absolutely **_necessary_**
+        /// Call to nSpace instead of setw is absolutely **_necessary_**
         /// because the Column class requires explicit and granular space management
         /// in order to function properly.
-        return std::wstring(n, L' ');
+        return wstring(n, L' ');
     }
     
 
     // Preconditions: Expects an outputStream.
     // Postconditions: Dump the next entry in the column into outputStream given.
-    void dumpNext(std::wostream& os)
+    void dumpNext(wostream& os)
     {
         if (currentIt == items.cend())
             return;
@@ -300,7 +302,7 @@ public:
         }
 
         os << nSpace(leftPadding);
-        std::invoke(*currentIt, os);
+        invoke(*currentIt, os);
 
         currentIt++;
     }
@@ -315,7 +317,7 @@ public:
 
     // Preconditions: Instance was properly initialized
     // Postconditions: The number of entries is returned.
-    const std::size_t getSize() override
+    const size_t getSize() override
     {
         return items.size();
     }
@@ -330,10 +332,10 @@ public:
     }
 
 private:
-    std::vector<std::function<void(std::wostream&)>> items;
+    vector<function<void(wostream&)>> items;
     int leftPadding, rightPadding;
-    std::size_t maxCharLength;
-    std::wstring title;
+    size_t maxCharLength;
+    wstring title;
     bool titlePrinted;
 
     decltype(items.cbegin()) currentIt;

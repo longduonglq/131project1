@@ -4,22 +4,24 @@
 
 #include "MixedColumn.h"
 
-std::size_t displayLength(const char* cStr)
+using namespace std;
+
+size_t displayLength(const char* cStr)
 {
     return strlen(cStr);
 }
 
-std::size_t displayLength(const wchar_t* cStr)
+size_t displayLength(const wchar_t* cStr)
 {
     return wcslen(cStr);
 }
 
-std::size_t displayLength(std::wstring WideStr)
+size_t displayLength(wstring WideStr)
 {
     return WideStr.size();
 }
 
-std::size_t displayLength(char)
+size_t displayLength(char)
 {
     return 1;
 }

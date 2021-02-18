@@ -52,7 +52,7 @@ public:
     std::function<void(void)> frequencyTableDisplayAdapter(Func frequencyTableGetter);
 
     // Preconditions: None.
-    // Postconditions: Display all result and write to file as specified by user.
+    // Postconditions: Display all stat then write summary to user-specified location.
     void displayAllResultAndWriteToFile();
 };
 

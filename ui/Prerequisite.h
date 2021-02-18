@@ -11,12 +11,14 @@
 #include <optional>
 #include <functional>
 
+using namespace std;
+
 class AbstractPrerequisite
 {
 public:
     // Preconditions: Expect an error message
     // Postconditions: Instance initialized
-    AbstractPrerequisite(const std::string& _errorMsg): errorMsg {_errorMsg}
+    AbstractPrerequisite(const string& _errorMsg): errorMsg {_errorMsg}
     {}
     virtual ~AbstractPrerequisite() {} ;
 
@@ -26,23 +28,23 @@ public:
 
     // Preconditions: None
     // Postconditions: Return errorMsg given.
-    virtual const std::string getErrorMsg()
+    virtual const string getErrorMsg()
     {
         return errorMsg;
     }
 
 private:
-    std::string errorMsg;
+    string errorMsg;
 };
 
 class InvokeMethodRequirement : public AbstractPrerequisite
 {
 public:
-    typedef std::function<bool(void)> CheckFunc_t;
+    typedef function<bool(void)> CheckFunc_t;
     // Preconditions: expect a boolean checkFunction and an errorMessage
     // Postconditions: Instance initialized.
     InvokeMethodRequirement(CheckFunc_t&& _checkFunc,
-                            const std::string& _errorMsg)
+                            const string& _errorMsg)
         :
         AbstractPrerequisite (_errorMsg),
         checkFunc {_checkFunc}
@@ -53,7 +55,7 @@ public:
     // Postconditions: Return whether the conditions checked by CheckFunc is met.
     bool isSatisfied() override
     {
-        return std::invoke(checkFunc);
+        return invoke(checkFunc);
     }
 private:
     CheckFunc_t checkFunc;
@@ -65,8 +67,8 @@ class RequireValuedOptional : public InvokeMethodRequirement
 public:
     // Preconditions: Expect a reference wrapper to the optional needed watching and an errorMsg
     // Postconditions: Instance is initialized
-    explicit RequireValuedOptional(std::reference_wrapper<OptionalType> _target,
-                                   const std::string& _errorMsg) :
+    explicit RequireValuedOptional(reference_wrapper<OptionalType> _target,
+                                   const string& _errorMsg) :
         InvokeMethodRequirement([_target]() { return _target.get().has_value(); }, _errorMsg ) {}
     virtual ~RequireValuedOptional() override {};
 };
@@ -77,8 +79,8 @@ class RequireNonEmptyVector : public InvokeMethodRequirement
 public:
     // Preconditions: Expect a reference wrapper to the vector needed watching and an errorMsg
     // Postconditions: Instance is initialized
-    explicit RequireNonEmptyVector(std::reference_wrapper<VecType> _target,
-                                   const std::string& _errorMsg) :
+    explicit RequireNonEmptyVector(reference_wrapper<VecType> _target,
+                                   const string& _errorMsg) :
         InvokeMethodRequirement([_target]() { return !_target.get().empty(); }, _errorMsg) {}
     virtual ~RequireNonEmptyVector() override {};
 };
@@ -89,8 +91,8 @@ class RequireNonEmptyString : public InvokeMethodRequirement
 public:
     // Preconditions: Expect a reference wrapper to the string needed watching and an errorMsg
     // Postconditions: Instance is initialized
-    explicit RequireNonEmptyString(std::reference_wrapper<StringType> _target,
-                                   const std::string& _errorMsg) :
+    explicit RequireNonEmptyString(reference_wrapper<StringType> _target,
+                                   const string& _errorMsg) :
         InvokeMethodRequirement([_target] () { return !_target.get().empty() ;}) {}
     virtual ~RequireNonEmptyString() override {};
 };

@@ -8,24 +8,25 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
 /// Credit: Based largely on Prof. Hester Tools.cpp
 
 // Preconditions: A well formed prompt and an inputable type parameter represents the expected input type.
 // Postconditions: The user input is returned in type provided.
 template <typename T>
-T inputType(std::string prompt)
+T inputType(string prompt)
 {
     while (true)
     {
         T input;
-        std::cout << prompt;
-        std::cin >> input;
-        std::cin.ignore(999, '\n');
-        if (!std::cin.fail())
+        cout << prompt;
+        cin >> input;
+        cin.ignore(999, '\n');
+        if (!cin.fail())
             return input;
-        std::cin.clear();
-        std::cin.ignore(999, '\n');
-        std::cout << "Input Failure! Try again" << std::endl;
+        cin.clear();
+        cin.ignore(999, '\n');
+        cout << "Input Failure! Try again" << endl;
     }
 }
 

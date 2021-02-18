@@ -133,15 +133,15 @@ public:
 
     // Preconditions: Instance was initialized with more than 0 element.
     // Postconditions: Return the mode.
-    std::vector<T> getMode() const
+    vector<T> getMode() const
     {
         auto freqTable = getFrequencyTable();
-        auto maxEntry = std::max_element(freqTable.cbegin(), freqTable.cend(),
+        auto maxEntry = max_element(freqTable.cbegin(), freqTable.cend(),
                                          [](const FrequencyEntry& entry1, const  FrequencyEntry& entry2)
                                          {
                                                 return entry1.frequency < entry2.frequency;
                                          });
-        auto modeElements = std::vector<T>();
+        auto modeElements = vector<T>();
         for (auto& entry : freqTable)
         {
             if (entry.frequency >= maxEntry->frequency)
@@ -228,21 +228,21 @@ public:
     // Postconditions: Return outlierFence if IQR exists, nullopt otherwise.
     optional<pair<double, double>> getOutlierFence() const
     {
-        if (!getIQR().has_value()) return std::nullopt;
+        if (!getIQR().has_value()) return nullopt;
         const auto& q = getQuartiles();
-        return std::make_pair(q.Q1.value() - 1.5 * getIQR().value(), q.Q3.value() + 1.5 * getIQR().value());
+        return make_pair(q.Q1.value() - 1.5 * getIQR().value(), q.Q3.value() + 1.5 * getIQR().value());
     }
 
     // Preconditions: Instance was initialized with more than 0 element.
     // Postconditions: Return an array of outliers. 
-    std::vector<T> getOutliers() const
+    vector<T> getOutliers() const
     {
-        auto outliers = std::vector<T>();
+        auto outliers = vector<T>();
         if (!getOutlierFence().has_value()) return outliers;
         auto fence = getOutlierFence().value();
-        std::copy_if(
+        copy_if(
             elements.cbegin(), elements.cend(),
-            std::back_inserter(outliers),
+            back_inserter(outliers),
             [&fence](const auto& e){ return e < fence.first || e > fence.second; }
         );
         return outliers;
@@ -253,10 +253,10 @@ public:
     double getSumOfSquares() const
     {
         return
-        std::transform_reduce(
+        transform_reduce(
             elements.cbegin(), elements.cend(),
             0.0,
-            std::plus<>(),
+            plus<>(),
             [this](const T& element) { return pow(element - this->getMean(), 2);}
         );
     }
@@ -266,10 +266,10 @@ public:
     double getMeanAbsoluteDeviation() const
     {
         return
-            std::transform_reduce(
+            transform_reduce(
                 elements.cbegin(), elements.cend(),
                 0.0,
-                std::plus<>(),
+                plus<>(),
                 [this](const T& element) { return abs(element - this->getMean()); }
         ) / getSize();
     }
@@ -280,10 +280,10 @@ public:
     {
         return
         sqrt(
-            std::transform_reduce(
+            transform_reduce(
                 elements.cbegin(), elements.cend(),
                 0.0,
-                std::plus<>(),
+                plus<>(),
                 [](const T& element) { return element * element; }
             ) / getSize()
         );
@@ -315,10 +315,10 @@ public:
     double getSkewness() const
     {
         return
-        std::transform_reduce(
+        transform_reduce(
             elements.cbegin(), elements.cend(),
             0.0,
-            std::plus<>(),
+            plus<>(),
             [this](const auto& e)
             {
                 return pow(e - this->getMean(), 3);
@@ -333,10 +333,10 @@ public:
         double n = getSize();
         double coefficient = n * (n + 1) / ((n - 1) * (n - 2) * (n - 3));
         return
-        coefficient * std::transform_reduce(
+        coefficient * transform_reduce(
             elements.cbegin(), elements.cend(),
             0.0,
-            std::plus<>(),
+            plus<>(),
             [this](const auto& e){ return pow(e - this->getMean(), 4); }
         ) / pow(getStandardDeviation(), 4);
     }
@@ -352,9 +352,9 @@ public:
     
     // Preconditions: Instance was initialized with more than 0 element.
     // Postconditions: Return a vector of struct that contains value, frequency, and frequency percentage.
-    std::vector<FrequencyEntry> getFrequencyTable() const
+    vector<FrequencyEntry> getFrequencyTable() const
     {
-        auto frequencyTable = std::vector<FrequencyEntry> ();
+        auto frequencyTable = vector<FrequencyEntry> ();
         auto it = elements.cbegin();
         while (it < elements.cend())
         {
@@ -373,10 +373,10 @@ public:
             frequencyTable.push_back(frequencyEntry);
         }
 
-        long totalFrequency = std::transform_reduce(
+        long totalFrequency = transform_reduce(
             frequencyTable.cbegin(), frequencyTable.cend(),
             0,
-            std::plus<>(),
+            plus<>(),
             [](const FrequencyEntry& entry) { return entry.frequency; }
         );
         for (auto& entry: frequencyTable)
@@ -387,30 +387,30 @@ public:
     }
 
 protected:
-    std::vector<T> elements;
+    vector<T> elements;
 
     // caches for statistics that are used many times
-    mutable std::optional<T> _sumCache;
-    mutable std::optional<double> _meanCache;
-    mutable std::optional<double> _varianceCache;
-    mutable std::optional<Quartiles> _quartilesCache;
+    mutable optional<T> _sumCache;
+    mutable optional<double> _meanCache;
+    mutable optional<double> _varianceCache;
+    mutable optional<Quartiles> _quartilesCache;
 
     /// Helpers
-    std::optional<double> getMedianInRange(decltype(elements.cbegin()) lowBound, decltype(elements.cbegin()) highBound) const
+    optional<double> getMedianInRange(decltype(elements.cbegin()) lowBound, decltype(elements.cbegin()) highBound) const
     {
         ptrdiff_t distance = std::distance(lowBound, highBound);
         if (distance <= 2)
-            return std::nullopt;
+            return nullopt;
 
         if (distance % 2 == 0)
         {
             auto medianIndex = distance / 2 + std::distance(elements.cbegin(), lowBound);
-            return std::make_optional((elements.at(medianIndex) + elements.at(medianIndex - 1)) / 2.0);
+            return make_optional((elements.at(medianIndex) + elements.at(medianIndex - 1)) / 2.0);
         }
         else
         {
             auto medianIndex = distance / 2 + std::distance(elements.cbegin(), lowBound);
-            return std::make_optional(elements.at(medianIndex));
+            return make_optional(elements.at(medianIndex));
         }
     }
 };

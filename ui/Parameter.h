@@ -9,21 +9,23 @@
 #include <optional>
 #include "inputType.h"
 
+using namespace std;
+
 template <typename T>
 class AbstractParameter
 {
 public:
     // Preconditions:  Expect a prompt
     // Postconditions: Instance created with prompt.
-    explicit AbstractParameter(std::string&& _prompt) :
+    explicit AbstractParameter(string&& _prompt) :
         prompt {_prompt},
-        validator {std::nullopt}
+        validator {nullopt}
     {}
 
     // Preconditions:  Expect prompt and input validator
     // Postconditions: Instance created with prompt and input validator
-    AbstractParameter(std::string&& _prompt,
-                      std::function<bool(const T&)> _validator) :
+    AbstractParameter(string&& _prompt,
+                      function<bool(const T&)> _validator) :
         prompt {_prompt},
         validator {_validator}
     {}
@@ -39,19 +41,19 @@ public:
         {
             input = inputType<T>(prompt);
             if (validator.has_value() && !validator.value()(input))
-                std::cout << "ERROR: Input did not pass validator\'s check." << std::endl;
+                cout << "ERROR: Input did not pass validator\'s check." << endl;
             else
                 return input;
         } while (true);
     }
 private:
-    std::string prompt;
-    std::optional<std::function<bool(const T&)>> validator;
+    string prompt;
+    optional<function<bool(const T&)>> validator;
 };
 
 using LongParameter = AbstractParameter<long>;
 using DoubleParameter = AbstractParameter<double>;
 using CharParameter = AbstractParameter<char>;
-using StringParameter = AbstractParameter<std::string>;
+using StringParameter = AbstractParameter<string>;
 
 #endif //PROJ1_PARAMETER_H
