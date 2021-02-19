@@ -12,6 +12,7 @@
 #include <optional>
 #include <iomanip>
 #include <functional>
+#include <cassert>
 #include "Table.h"
 #include "AbstractColumn.h"
 #include "configuration.h"
@@ -42,10 +43,10 @@ template<typename FloatType,
          typename enable_if<is_floating_point<FloatType>::value, int>::type = 0>
 size_t displayLength(const FloatType& var)
 {
-    if (long(var) == var)
-    {
-        return displayLength(long(var));
-    }
+    //if (long(var) == var)
+    //{
+    //    return displayLength(long(var));
+    //}
     return displayLength((long)var) + config::FLOAT_NUMBER_DIGITS + 1;
 }
 
@@ -60,7 +61,7 @@ size_t displayLength(const vector<T>& vec)
     {
         return displayLength("None");
     }
-    for (auto it = vec.cbegin(); it != --vec.cend(); it++)
+    for (auto it = vec.cbegin(); it != vec.cend(); it++)
     {
         if (distance(vec.cbegin(), it) > config::ARRAY_MAX_WRAPPING_LENGTH)
         {
@@ -180,14 +181,14 @@ public:
         if (op.has_value())
             maxCharLength = max(maxCharLength, displayLength(op.value()));
         else
-            maxCharLength = max(maxCharLength, displayLength("None"));
+            maxCharLength = max(maxCharLength, displayLength(L"None"));
         items.push_back(
             [this, op](wostream& os)
             {
                 if (op.has_value())
                     os << op.value() << nSpace(maxCharLength - displayLength(op.value()) + rightPadding);
                 else
-                    os << L"None" << nSpace(maxCharLength - displayLength("None") + rightPadding);
+                    os << L"None" << nSpace(maxCharLength - displayLength(L"None") + rightPadding);
             }
         );
         addItems(otherArgs...);
@@ -281,6 +282,7 @@ public:
         /// Call to nSpace instead of setw is absolutely **_necessary_**
         /// because the Column class requires explicit and granular space management
         /// in order to function properly.
+        assert(n >= 0);
         return wstring(n, L' ');
     }
     
@@ -300,7 +302,7 @@ public:
             titlePrinted = true;
             return;
         }
-
+        
         os << nSpace(leftPadding);
         invoke(*currentIt, os);
 

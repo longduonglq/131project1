@@ -142,7 +142,7 @@ public:
                                                 return entry1.frequency < entry2.frequency;
                                          });
         auto modeElements = vector<T>();
-        for (auto& entry : freqTable)
+        for (const auto& entry : freqTable)
         {
             if (entry.frequency >= maxEntry->frequency)
                 modeElements.push_back(entry.value);
@@ -207,7 +207,7 @@ public:
                     Quartiles {
                         .Q1 = getMedianInRange(elements.cbegin(), elements.cbegin() + getSize() / 2),
                         .Q2 = getMedianInRange(elements.cbegin(), elements.cend()),
-                        .Q3 = getMedianInRange(elements.cbegin() + getSize() / 2 + 1, elements.cend())
+                        .Q3 = getMedianInRange(elements.cbegin() + getSize() / 2, elements.cend())
                     });
             }
             return _quartilesCache.value();
@@ -312,8 +312,10 @@ public:
     
     // Preconditions: Instance was initialized with more than 0 element.
     // Postconditions: Return skewness
-    double getSkewness() const
+    optional<double> getSkewness() const
     {
+        if (getSize() * pow(getStandardDeviation(), 3) == 0.0)
+            return nullopt;
         return
         transform_reduce(
             elements.cbegin(), elements.cend(),
@@ -328,9 +330,11 @@ public:
     
     // Preconditions: Instance was initialized with more than 0 element.
     // Postconditions: Return kurtosis.
-    double getKurtosis() const
+    optional<double> getKurtosis() const
     {
         double n = getSize();
+        if (pow(getStandardDeviation(), 4) == 0.0 || (n - 1)*(n - 2)*(n - 3) == 0.0)
+            return nullopt;
         double coefficient = n * (n + 1) / ((n - 1) * (n - 2) * (n - 3));
         return
         coefficient * transform_reduce(
@@ -343,11 +347,13 @@ public:
     
     // Preconditions: Instance was initialized with more than 0 element.
     // Postconditions: Return kurtosis excess
-    double getKurtosisExcess() const
+    optional<double> getKurtosisExcess() const
     {
         double n = getSize();
+        if (!getKurtosis().has_value() || (n - 2) * (n - 3) == 0)
+            return nullopt;
         double adjustmentTerm = -3* (n - 1) * (n - 1) / ((n - 2) * (n - 3));
-        return getKurtosis() + adjustmentTerm;
+        return getKurtosis().value() + adjustmentTerm;
     }
     
     // Preconditions: Instance was initialized with more than 0 element.
@@ -356,21 +362,23 @@ public:
     {
         auto frequencyTable = vector<FrequencyEntry> ();
         auto it = elements.cbegin();
-        while (it < elements.cend())
+        for (; it != elements.cend(); it++)
         {
-            auto frequencyEntry = FrequencyEntry {
+            auto newEntry = FrequencyEntry{
                 .value = *it,
                 .frequency = 1,
-                .frequencyPercentage = 0
+                .frequencyPercentage = -1
             };
-            while ( (it) < --elements.cend() && *++it == frequencyEntry.value)
-                frequencyEntry.frequency++;
-            if (it == --elements.cend() && *it == frequencyEntry.value)
+
+            if (std::next(it) != elements.cend())
             {
-                frequencyEntry.frequency++;
-                it++;
+                while (std::next(it) != elements.cend() && *std::next(it) == newEntry.value)
+                {
+                    newEntry.frequency++;
+                    it++;
+                }
             }
-            frequencyTable.push_back(frequencyEntry);
+            frequencyTable.push_back(newEntry);
         }
 
         long totalFrequency = transform_reduce(
@@ -399,7 +407,7 @@ protected:
     optional<double> getMedianInRange(decltype(elements.cbegin()) lowBound, decltype(elements.cbegin()) highBound) const
     {
         ptrdiff_t distance = std::distance(lowBound, highBound);
-        if (distance <= 2)
+        if (distance <= 1)
             return nullopt;
 
         if (distance % 2 == 0)

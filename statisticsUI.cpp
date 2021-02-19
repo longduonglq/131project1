@@ -3,12 +3,14 @@
 // Description: Implements methods that display choices and process user choices.
 
 #include "statisticsUI.h"
+#include "ui/configuration.h"
 
 using namespace std;
+using namespace config;
 
 void StatsUI::showCurrentState()
 {
-    auto optionColumn1 = new MixedColumn (0, 5,L"");
+    auto* optionColumn1 = new MixedColumn (DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"");
     optionColumn1->addItems(
         L"A> Load data file",
         L"B> Minimum",
@@ -25,7 +27,7 @@ void StatsUI::showCurrentState()
         L"W> Display result and write to file.",
         L"0> Return"
     );
-    auto optionColumn2 = new MixedColumn(0, 5,L"");
+    auto* optionColumn2 = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"");
     optionColumn2->addItems(
         L"M> Mid Range",
         L"N> Quartiles",
@@ -45,7 +47,7 @@ void StatsUI::showCurrentState()
 void StatsUI::init()
 {
     this->terminateCharacter = '0';
-    choiceCollector = CharParameter ("Option: ", [](const char& c){ return c == '0' || (tolower(c) >= 'a' && tolower(c) <= 'w');});
+    choiceCollector = CharParameter ("Option: ", [this](const char& c){ return c == terminateCharacter || (tolower(c) >= 'a' && tolower(c) <= 'w');});
 
     auto nonEmptyVector = shared_ptr<AbstractPrerequisite>( new RequireNonEmptyVector(ref(elements), "No elements in array"));
 
@@ -58,7 +60,7 @@ void StatsUI::init()
     addOption('g', statsDisplayAdapter(L"Mean", bind(&Statistics::getMean, this))) .require(nonEmptyVector);
     addOption('h', statsDisplayAdapter(L"Median", bind(&Statistics::getMedian, this))).require(nonEmptyVector);
     addOption('i', frequencyTableDisplayAdapter(bind(&Statistics::getFrequencyTable, this))).require(nonEmptyVector);
-    addOption('j', statsDisplayAdapter(L"Mode", bind(&Statistics::getSize, this))).require(nonEmptyVector);
+    addOption('j', statsDisplayAdapter(L"Mode", bind(&Statistics::getMode, this))).require(nonEmptyVector);
     addOption('k', statsDisplayAdapter(L"Standard Deviation", bind(&Statistics::getStandardDeviation, this))).require(nonEmptyVector);
     addOption('l', statsDisplayAdapter(L"Variance", bind(&Statistics::getVariance, this))).require(nonEmptyVector);
     addOption('m', statsDisplayAdapter(L"Mid Range", bind(&Statistics::getMidRange, this))).require(nonEmptyVector);
@@ -78,7 +80,7 @@ void StatsUI::loadFileOptionHandler(string&& path)
 {
     Statistics::loadDataFromFilePath(path);
     wcout << "File opened successfully!" << endl;
-    auto numbers = new MixedColumn(0, 5, L"");
+    auto* numbers = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"");
     numbers->addItems(elements);
     auto table = Table({numbers}, L"Data");
     table.dumpTableTo(wcout);
@@ -91,9 +93,9 @@ function<void(void)> StatsUI::statsDisplayAdapter(WideString name, Func statsGet
     return [statsGetter, name] ()
     {
         auto stat = statsGetter();
-        auto nameColumn = new MixedColumn(0, 5, L"", name);
-        auto equalColumn = new MixedColumn(0, 5, L"", L"=");
-        auto statColumn = new MixedColumn(0, 5, L"", stat);
+        auto* nameColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", name);
+        auto* equalColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", L"=");
+        auto* statColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", stat);
         Table({nameColumn, equalColumn, statColumn}, L"Result: ").dumpTableTo(wcout);
     };
 }
@@ -104,10 +106,10 @@ function<void(void)> StatsUI::quartilesDisplayAdapter(Func quartilesGetter)
     return [quartilesGetter] ()
     {
         Quartiles  quartiles = quartilesGetter();
-        auto nameColumn = new MixedColumn(0, 5, L"", "Q1", "Q2", "Q3");
-        auto equalColumn = new MixedColumn(0, 5, L"");
+        auto* nameColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", "Q1", "Q2", "Q3");
+        auto* equalColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"");
         equalColumn->repeatedAddItems(vector<wstring>(3, L"-->"));
-        auto statsColumn = new MixedColumn(0, 5, L"", quartiles.Q1, quartiles.Q2, quartiles.Q3);
+        auto* statsColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", quartiles.Q1, quartiles.Q2, quartiles.Q3);
         Table({nameColumn, equalColumn, statsColumn}, L"Quartiles: ").dumpTableTo(wcout);
     };
 }
@@ -127,11 +129,11 @@ Table* StatsUI::frequencyTableToUITable(Func frequencyTableGetter)
         [](const auto& entry){return 100 * mem_fn(&FrequencyEntry::frequencyPercentage)(entry);}
     );
 
-    auto valueColumn = new MixedColumn (0, 5, L"Values");
+    auto* valueColumn = new MixedColumn (DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"Values");
     valueColumn->repeatedAddItems(values);
-    auto freqColumn = new MixedColumn (0, 5, L"Frequency");
+    auto* freqColumn = new MixedColumn (DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"Frequency");
     freqColumn->repeatedAddItems(frequency);
-    auto freqPercentColumn = new MixedColumn (0, 5, L"Percentage");
+    auto* freqPercentColumn = new MixedColumn (DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"Percentage");
     freqPercentColumn->repeatedAddItems(frequencyPercentage);
     return new Table({valueColumn, freqColumn, freqPercentColumn}, L"", -1, false);
 }
@@ -141,7 +143,7 @@ function<void(void)> StatsUI::frequencyTableDisplayAdapter(Func frequencyTableGe
 {
     return [this, frequencyTableGetter] ()
     {
-        auto table = frequencyTableToUITable(frequencyTableGetter);
+        auto* table = frequencyTableToUITable(frequencyTableGetter);
         table->dumpTableTo(wcout);
         delete table;
     };
@@ -149,7 +151,7 @@ function<void(void)> StatsUI::frequencyTableDisplayAdapter(Func frequencyTableGe
 
 void StatsUI::displayAllResultAndWriteToFile()
 {
-    auto statisticNameColumn = new MixedColumn (0, 5,L"Concept");
+    auto* statisticNameColumn = new MixedColumn (DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING,L"Concept");
     statisticNameColumn->addItems(
         L"Data",
         L"Minimum",
@@ -178,18 +180,18 @@ void StatsUI::displayAllResultAndWriteToFile()
         L"Frequency Table"
     );
 
-    auto quartiles = getQuartiles();
-    auto quartileNames = new MixedColumn(0, 5, L"", "Q1", "Q2", "Q3");
-    auto arrowColumn = new MixedColumn(0, 5, L"");
+    const auto& quartiles = getQuartiles();
+    auto* quartileNames = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", "Q1", "Q2", "Q3");
+    auto* arrowColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"");
     arrowColumn->repeatedAddItems(vector<const char*>(3, "-->"));
-    auto quartileValues = new MixedColumn(0, 5, L"", quartiles.Q1, quartiles.Q2, quartiles.Q3);
+    auto* quartileValues = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"", quartiles.Q1, quartiles.Q2, quartiles.Q3);
     auto* quartileTable = new Table({quartileNames, arrowColumn, quartileValues}, L"", -1, false);
 
-    auto numbersColumn = new MixedColumn(0, 5, L"");
+    auto* numbersColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"");
     numbersColumn->addItems(elements);
-    auto dataTable = new Table({numbersColumn}, L"", -1 , false);
+    auto* dataTable = new Table({numbersColumn}, L"", -1 , false);
 
-    auto statisticValueColumn = new MixedColumn(0, 5, L"Values");
+    auto* statisticValueColumn = new MixedColumn(DEFAULT_LEFT_PADDING, DEFAULT_RIGHT_PADDING, L"Values");
     statisticValueColumn->addItems(
         dataTable,
         getMin(),
@@ -218,8 +220,8 @@ void StatsUI::displayAllResultAndWriteToFile()
         frequencyTableToUITable(bind(&Statistics::getFrequencyTable, this))
     );
 
-    auto equalColumn = new MixedColumn(0, 2, L"");
-    equalColumn->repeatedAddItems(vector<char>(24, '='));
+    auto* equalColumn = new MixedColumn(DEFAULT_LEFT_PADDING, 2, L"");
+    equalColumn->repeatedAddItems(vector<const wchar_t*>(24, L"="));
 
     auto table = Table({statisticNameColumn, equalColumn, statisticValueColumn}, L"Statistics");
     table.dumpTableTo(wcout);

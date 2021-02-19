@@ -18,16 +18,33 @@ class Table
 {
 public:
     int tableWidth;
-
+    
+    // Preconditions: Expects a vector of pointers to AbstractColum objects and a title
+    // Postconditions: Instance initialzied with columns given
     Table(const std::vector<AbstractColumn*>& _columns, std::wstring _title);
+
+    // Preconditions: None
+    // Postconditions: Instance initialized with columns given. If selfCentered is false, table is not centered. If it is true, center according to consoleWidth argument
     Table(const std::vector<AbstractColumn*>& _columns, std::wstring _title, int _consoleWidth, bool selfCentered=true);
-
+    
+    // Preconditions: None
+    // Postconditions: Outputs a string of n spaces
     std::wstring nSpace(int n) const;
+
+    // Preconditions:  None 
+    // Postconditions: Outputs a string of doublines with length of n
     std::wstring doubleLine(int n) const;
+
+    // Preconditions: None
+    // Postconditions: Outputs a string of singlines with length of n
     std::wstring singleLine(int n);
-
+    
+    // Preconditions: Table was properly initialized with columns
+    // Postconditions: Content of columns contained is dumped into outstream.
     void dumpTableTo(std::wostream& os) const;
-
+    
+    // Preconditions: Table was properly initialized with heap allocated columns
+    // Postconditions: All columns object contained is deallocated.
     ~Table();
 
 private:
