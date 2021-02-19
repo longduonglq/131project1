@@ -207,7 +207,7 @@ public:
                     Quartiles {
                         .Q1 = getMedianInRange(elements.cbegin(), elements.cbegin() + getSize() / 2),
                         .Q2 = getMedianInRange(elements.cbegin(), elements.cend()),
-                        .Q3 = getMedianInRange(elements.cbegin() + getSize() / 2, elements.cend())
+                        .Q3 = getMedianInRange(elements.cbegin() + getSize() / 2 + 1, elements.cend())
                     });
             }
             return _quartilesCache.value();
@@ -314,18 +314,20 @@ public:
     // Postconditions: Return skewness
     optional<double> getSkewness() const
     {
-        if (getSize() * pow(getStandardDeviation(), 3) == 0.0)
+        size_t n = getSize();
+        if (n * pow(getStandardDeviation(), 3) == 0.0 || (n - 1)*(n - 2) == 0.0)
             return nullopt;
+        double coefficient = static_cast<double>(n) / ((n - 1) * (n - 2));
         return
-        transform_reduce(
+        coefficient * transform_reduce(
             elements.cbegin(), elements.cend(),
             0.0,
             plus<>(),
-            [this](const auto& e)
+            [this](const double& e)
             {
-                return pow(e - this->getMean(), 3);
+                return pow((e - this->getMean())/(getStandardDeviation()), 3);
             }
-        ) / (getSize() * pow(getStandardDeviation(), 3));
+        );
     }
     
     // Preconditions: Instance was initialized with more than 0 element.
